@@ -215,16 +215,10 @@ function renderizarTarefas(tarefa) {
             >
 
             <div class="min-w-0 flex-1">
-
-                <h3 class="font-semibold ${tarefa.concluida
-            ? "line-through text-zinc-600"
-            : "text-zinc-100"
-        }">
+                <h3 class="font-semibold ${tarefa.concluida? "line-through text-zinc-600": "text-zinc-100"}">
                     ${tarefa.titulo}
                 </h3>
-
             </div>
-
 
             <div class="w-40 text-sm text-zinc-500">
                 ${tarefa.descricao}
@@ -243,7 +237,6 @@ function renderizarTarefas(tarefa) {
 
             <div class="flex items-center gap-1">
 
-                <!-- EDITAR -->
                 <button
                     data-editar-tarefa-id="${tarefa.id}"
                     type="button"
@@ -267,8 +260,6 @@ function renderizarTarefas(tarefa) {
 
                 </button>
 
-
-                <!-- EXCLUIR -->
                 <button
                     data-excluir-tarefa-id="${tarefa.id}"
                     type="button"
@@ -511,6 +502,43 @@ listaProjetos.addEventListener("click", async (e) => {
 
     } catch (erro) {
         alert("Erro: " + erro.message);
+    }
+
+})
+
+listaTarefas.addEventListener("click", async (e) => {
+    const botaoExcluir = e.target.closest("[data-excluir-tarefa-id]");
+
+    if(botaoExcluir === null) {
+        return;
+    }
+
+    const botaoId = botaoExcluir.dataset.excluirTarefaId;
+
+    const confirmarExclusao = confirm("Deseja excluir esta tarefa?");
+
+    if(!confirmarExclusao) {
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`https://taskflow-api-j3lv.onrender.com/tarefas/${botaoId}`, {
+            method: "DELETE"
+        });
+
+        if(!resposta.ok) {
+            throw new Error("Falha ao deletar a tarefa");
+        }
+
+        tarefasAtuais = tarefasAtuais.filter(tarefa => {
+            return tarefa.id !== Number(botaoId);
+        })
+
+        atualizarResumo(tarefasAtuais);
+        renderizarTarefasFiltradas();
+
+    } catch(erro) {
+        console.log(erro.message);
     }
 
 })
